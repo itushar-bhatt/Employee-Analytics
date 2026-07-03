@@ -1,24 +1,30 @@
 using Microsoft.VisualBasic.FileIO;
 using EmployeeDashboard.Models;
+using System.Diagnostics;
 
-namespace EmployeeDashboard.Services;
+namespace EmployeeDashboard.Data;
 
 public class CsvImportService
 {
     private readonly DatabaseService _databaseService;
     private readonly EmployeeRepository _employeeRepository;
+    private readonly UploadHistoryRepository _uploadHistoryRepository;
 
     public CsvImportService(
         DatabaseService databaseService,
-        EmployeeRepository employeeRepository)
+        EmployeeRepository employeeRepository,
+        UploadHistoryRepository uploadHistoryRepository)
     {
         _databaseService = databaseService;
         _employeeRepository = employeeRepository;
+        _uploadHistoryRepository = uploadHistoryRepository;
     }
 
     public ImportResult Import(string filePath)
     {
+        Stopwatch stopwatch = Stopwatch.StartNew();
         ImportResult result = new();
+
 
         using var connection = _databaseService.GetConnection();
         connection.Open();
@@ -55,6 +61,11 @@ public class CsvImportService
         }
 
         transaction.Commit();
+        stopwatch.Stop();
+
+        result.DurationInSeconds = stopwatch.Elapsed.TotalSeconds;
+
+        SaveUploadHistory(filePath, result);
 
         return result;
     }
@@ -72,5 +83,22 @@ public class CsvImportService
             WorkDate = DateTime.Parse(data[6]),
             Hours = decimal.Parse(data[7])
         };
+    }
+
+    private void SaveUploadHistory(
+        string filePath,
+        ImportResult result)
+    {
+        UploadHistory history = new()
+        {
+            FileName = Path.GetFileName(filePath),
+            UploadDate = DateTime.Now,
+            TotalRows = result.TotalRows,
+            ImportedRows = result.ImportedRows,
+            DuplicateRows = result.DuplicateRows,
+            DurationInSeconds = result.DurationInSeconds
+        };
+
+        _uploadHistoryRepository.Insert(history);
     }
 }

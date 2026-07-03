@@ -1,7 +1,7 @@
 using Microsoft.Data.Sqlite;
 
 
-namespace EmployeeDashboard.Services;
+namespace EmployeeDashboard.Data;
 
 public class DatabaseService
 {

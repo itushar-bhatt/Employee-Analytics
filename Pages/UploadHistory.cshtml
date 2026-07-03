@@ -1,0 +1,44 @@
+@page
+@model EmployeeDashboard.Pages.UploadHistoryModel
+
+<h2>Upload History</h2>
+
+<table class="table table-bordered table-striped">
+
+    <thead>
+
+        <tr>
+            <th>Date</th>
+            <th>File Name</th>
+            <th>Total</th>
+            <th>Imported</th>
+            <th>Duplicates</th>
+            <th>Duration</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+@foreach (var upload in Model.Uploads)
+{
+    <tr>
+
+        <td>@upload.UploadDate.ToString("dd-MMM-yyyy HH:mm")</td>
+
+        <td>@upload.FileName</td>
+
+        <td>@upload.TotalRows</td>
+
+        <td>@upload.ImportedRows</td>
+
+        <td>@upload.DuplicateRows</td>
+
+        <td>@upload.DurationInSeconds.ToString("F2") sec</td>
+
+    </tr>
+}
+
+    </tbody>
+
+</table>

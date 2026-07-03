@@ -1,4 +1,5 @@
-using EmployeeDashboard.Services;
+
+using EmployeeDashboard.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,6 +8,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<DatabaseService>();
 builder.Services.AddSingleton<EmployeeRepository>();
 builder.Services.AddSingleton<CsvImportService>();
+builder.Services.AddSingleton<UploadHistoryRepository>();
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using EmployeeDashboard.Services;
+using EmployeeDashboard.Data;
 
 namespace EmployeeDashboard.Pages;
 
@@ -49,6 +49,8 @@ public class UploadModel : PageModel
 
         Imported : {result.ImportedRows}
 
-        Duplicates : {result.DuplicateRows}"; 
-   }
+        Duplicates : {result.DuplicateRows}
+
+        Duration : {result.DurationInSeconds:F2} sec";
+    }
 }

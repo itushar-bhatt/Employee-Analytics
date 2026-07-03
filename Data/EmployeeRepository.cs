@@ -1,7 +1,7 @@
 using Microsoft.Data.Sqlite;
 using EmployeeDashboard.Models;
 
-namespace EmployeeDashboard.Services;
+namespace EmployeeDashboard.Data;
 
 public class EmployeeRepository
 {
@@ -57,7 +57,7 @@ public class EmployeeRepository
 
         return command.ExecuteNonQuery();
     }
-    public List<Employee> GetAll()
+    public List<Employee> GetAllEmployees()
     {
         List<Employee> employees = new();
 
@@ -72,19 +72,66 @@ public class EmployeeRepository
 
         while (reader.Read())
         {
-            employees.Add(new Employee
-            {
-                CompanyCode = reader["CompanyCode"].ToString()!,
-                EmployeeName = reader["EmployeeName"].ToString()!,
-                Email = reader["Email"].ToString()!,
-                ProjectName = reader["ProjectName"].ToString()!,
-                TaskName = reader["TaskName"].ToString()!,
-                Status = reader["Status"].ToString()!,
-                WorkDate = DateTime.Parse(reader["WorkDate"].ToString()!),
-                Hours = Convert.ToDecimal(reader["Hours"])
-            });
+            employees.Add(MapEmployee(reader));
         }
 
         return employees;
     }
+
+    public int GetEmployeeCount()
+    {
+        using var connection = _databaseService.GetConnection();
+        connection.Open();
+
+        string query = "SELECT COUNT(*) FROM Employees";
+
+        using var command = new SqliteCommand(query, connection);
+
+        return Convert.ToInt32(command.ExecuteScalar());
+    }
+
+    public List<Employee> SearchEmployees(string searchText)
+    {
+        List<Employee> employees = new();
+
+        using var connection = _databaseService.GetConnection();
+
+        connection.Open();
+
+        string query = @"
+            SELECT *
+            FROM Employees
+            WHERE EmployeeName LIKE @Search
+            OR Email LIKE @Search
+            OR ProjectName LIKE @Search
+            ORDER BY EmployeeName;";
+
+        using var command = new SqliteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@Search", $"%{searchText}%");
+
+        using var reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            employees.Add(MapEmployee(reader));
+        }
+
+        return employees;
+    }
+
+    private Employee MapEmployee(SqliteDataReader reader)
+{
+    return new Employee
+    {
+        CompanyCode = reader["CompanyCode"].ToString()!,
+        EmployeeName = reader["EmployeeName"].ToString()!,
+        Email = reader["Email"].ToString()!,
+        ProjectName = reader["ProjectName"].ToString()!,
+        TaskName = reader["TaskName"].ToString()!,
+        Status = reader["Status"].ToString()!,
+        WorkDate = DateTime.Parse(reader["WorkDate"].ToString()!),
+        Hours = Convert.ToDecimal(reader["Hours"])
+    };
+}
 }
