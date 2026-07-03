@@ -1,0 +1,76 @@
+using Microsoft.VisualBasic.FileIO;
+using EmployeeDashboard.Models;
+
+namespace EmployeeDashboard.Services;
+
+public class CsvImportService
+{
+    private readonly DatabaseService _databaseService;
+    private readonly EmployeeRepository _employeeRepository;
+
+    public CsvImportService(
+        DatabaseService databaseService,
+        EmployeeRepository employeeRepository)
+    {
+        _databaseService = databaseService;
+        _employeeRepository = employeeRepository;
+    }
+
+    public ImportResult Import(string filePath)
+    {
+        ImportResult result = new();
+
+        using var connection = _databaseService.GetConnection();
+        connection.Open();
+
+        using var transaction = connection.BeginTransaction();
+
+        using var parser = new TextFieldParser(filePath);
+
+        parser.SetDelimiters(",");
+        parser.HasFieldsEnclosedInQuotes = true;
+
+        // Skip header
+        parser.ReadFields();
+
+        while (!parser.EndOfData)
+        {
+            string[] data = parser.ReadFields()!;
+
+            result.TotalRows++;
+
+            Employee employee = CreateEmployee(data);
+
+            int rowsInserted =
+                _employeeRepository.Insert(employee, connection, transaction);
+
+            if (rowsInserted == 1)
+            {
+                result.ImportedRows++;
+            }
+            else
+            {
+                result.DuplicateRows++;
+            }
+        }
+
+        transaction.Commit();
+
+        return result;
+    }
+
+    private Employee CreateEmployee(string[] data)
+    {
+        return new Employee
+        {
+            CompanyCode = data[0].Trim(),
+            EmployeeName = data[1].Trim(),
+            Email = data[2].Trim(),
+            ProjectName = data[3].Trim(),
+            TaskName = data[4].Trim(),
+            Status = data[5].Trim(),
+            WorkDate = DateTime.Parse(data[6]),
+            Hours = decimal.Parse(data[7])
+        };
+    }
+}
