@@ -40,8 +40,18 @@ public class DatabaseService
                 Hours REAL
             );";
 
-        using var command = new SqliteCommand(query, connection);
-        command.ExecuteNonQuery();
+        try
+        {
+            using var command = new SqliteCommand(
+                "ALTER TABLE Employees ADD COLUMN UploadHistoryId INTEGER;",
+                connection);
+
+            command.ExecuteNonQuery();
+        }
+        catch
+        {
+            // Column already exists.
+        }
 
         string uniqueIndex = @"
             CREATE UNIQUE INDEX IF NOT EXISTS IDX_Employee_Unique

@@ -1,0 +1,78 @@
+@page
+@model IndexModel
+
+<div class="container mt-5">
+
+    <h1 class="text-center mb-5">
+        Employee Analytics Portal
+    </h1>
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="card shadow h-100">
+                <div class="card-body text-center">
+
+                    <h3>📤</h3>
+
+                    <h4>Upload Weekly CSV</h4>
+
+                    <p>
+                        Upload weekly employee data.
+                    </p>
+
+                    <a asp-page="/Upload"
+                       class="btn btn-primary">
+                        Open
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow h-100">
+                <div class="card-body text-center">
+
+                    <h3>📜</h3>
+
+                    <h4>Upload History</h4>
+
+                    <p>
+                        View previous uploads.
+                    </p>
+
+                    <a asp-page="/UploadHistory"
+                       class="btn btn-success">
+                        Open
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow h-100">
+                <div class="card-body text-center">
+
+                    <h3>📊</h3>
+
+                    <h4>Dashboard</h4>
+
+                    <p>
+                        Open Apache Superset dashboard.
+                    </p>
+
+                    <a href="http://localhost:8088/dashboard/12/"
+                       target="_blank"
+                       class="btn btn-dark">
+                        Open
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

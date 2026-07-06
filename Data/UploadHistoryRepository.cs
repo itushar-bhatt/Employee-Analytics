@@ -12,7 +12,7 @@ public class UploadHistoryRepository
         _databaseService = databaseService;
     }
 
-    public void Insert(UploadHistory history)
+    public int Insert(UploadHistory history)
     {
         using var connection = _databaseService.GetConnection();
         connection.Open();
@@ -47,6 +47,11 @@ public class UploadHistoryRepository
         command.Parameters.AddWithValue("@DurationInSeconds", history.DurationInSeconds);
 
         command.ExecuteNonQuery();
+        using var idCommand = new SqliteCommand(
+            "SELECT last_insert_rowid();",
+            connection);
+
+        return Convert.ToInt32(idCommand.ExecuteScalar());
     }
 
     public List<UploadHistory> GetAll()

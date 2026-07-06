@@ -2,6 +2,8 @@ namespace EmployeeDashboard.Models;
 
 public class UploadHistory
 {
+    public int Id { get; set; }
+
     public string FileName { get; set; } = "";
 
     public DateTime UploadDate { get; set; }

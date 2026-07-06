@@ -2,6 +2,10 @@ namespace EmployeeDashboard.Models;
 
 public class Employee
 {
+    public int Id { get; set; }
+
+    public int? UploadHistoryId { get; set; }
+
     public string CompanyCode { get; set; } = "";
     public string EmployeeName { get; set; } = "";
     public string Email { get; set; } = "";

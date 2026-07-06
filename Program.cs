@@ -1,4 +1,5 @@
 
+using System.Diagnostics;
 using EmployeeDashboard.Data;
 var builder = WebApplication.CreateBuilder(args);
 
