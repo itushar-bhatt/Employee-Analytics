@@ -40,6 +40,9 @@ public class DatabaseService
                 Hours REAL
             );";
 
+            using var createCommand = new SqliteCommand(query, connection);
+            createCommand.ExecuteNonQuery();
+
         try
         {
             using var command = new SqliteCommand(
@@ -48,7 +51,7 @@ public class DatabaseService
 
             command.ExecuteNonQuery();
         }
-        catch
+        catch(SqliteException)
         {
             // Column already exists.
         }
