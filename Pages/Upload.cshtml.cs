@@ -18,11 +18,6 @@ public class UploadModel : PageModel
 
     public string Message { get; set; } = "";
 
-    public void OnGet()
-    {
-
-    }
-
     public async Task OnPostAsync()
     {
         if (CsvFile == null)

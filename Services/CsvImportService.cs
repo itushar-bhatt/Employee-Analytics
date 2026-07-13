@@ -22,7 +22,6 @@ public class CsvImportService
 
     public ImportResult Import(string filePath)
     {
-        Stopwatch stopwatch = Stopwatch.StartNew();
         ImportResult result = new();
 
 
@@ -61,7 +60,6 @@ public class CsvImportService
         }
 
         transaction.Commit();
-        stopwatch.Stop();
 
         SaveUploadHistory(filePath, result);
 

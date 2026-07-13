@@ -5,12 +5,14 @@ namespace EmployeeDashboard.Data;
 
 public class DatabaseService
 {
+    // Connection string for the SQLite database.
     private readonly string _connectionString = "Data Source=Database/EmployeeDashboard.db";
 
     public SqliteConnection GetConnection()
     {
         return new SqliteConnection(_connectionString);
     }
+
 
     public void CreateDatabase()
     {
@@ -22,7 +24,8 @@ public class DatabaseService
         CreateEmployeesTable(connection);
         CreateUploadHistoryTable(connection);
     }
-
+    
+    // Creates the Employees table if it doesn't exist.
     private void CreateEmployeesTable(SqliteConnection connection)
     {
         string query = @"
@@ -39,6 +42,7 @@ public class DatabaseService
                 WorkDate TEXT,
                 Hours REAL
             );";
+            // Execute the query to create the Employees table.
 
             using var createCommand = new SqliteCommand(query, connection);
             createCommand.ExecuteNonQuery();
@@ -56,6 +60,8 @@ public class DatabaseService
             // Column already exists.
         }
 
+
+        // Create a unique index to prevent duplicate entries.
         string uniqueIndex = @"
             CREATE UNIQUE INDEX IF NOT EXISTS IDX_Employee_Unique
             ON Employees
@@ -70,10 +76,12 @@ public class DatabaseService
                 Hours
             );";
 
+
             using var indexCommand = new SqliteCommand(uniqueIndex, connection);
             indexCommand.ExecuteNonQuery();
     }
 
+    // Creates the UploadHistory table if it doesn't exist.
     private void CreateUploadHistoryTable(SqliteConnection connection)
     {
         string query = @"
