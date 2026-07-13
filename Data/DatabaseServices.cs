@@ -89,9 +89,7 @@ public class DatabaseService
 
                 ImportedRows INTEGER,
 
-                DuplicateRows INTEGER,
-
-                DurationInSeconds REAL
+                DuplicateRows INTEGER
             );";
 
         using var command = new SqliteCommand(query, connection);

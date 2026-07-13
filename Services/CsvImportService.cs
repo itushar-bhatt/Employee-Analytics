@@ -63,8 +63,6 @@ public class CsvImportService
         transaction.Commit();
         stopwatch.Stop();
 
-        result.DurationInSeconds = stopwatch.Elapsed.TotalSeconds;
-
         SaveUploadHistory(filePath, result);
 
         return result;
@@ -96,7 +94,6 @@ public class CsvImportService
             TotalRows = result.TotalRows,
             ImportedRows = result.ImportedRows,
             DuplicateRows = result.DuplicateRows,
-            DurationInSeconds = result.DurationInSeconds
         };
 
         _uploadHistoryRepository.Insert(history);

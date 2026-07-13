@@ -13,6 +13,4 @@ public class UploadHistory
     public int ImportedRows { get; set; }
 
     public int DuplicateRows { get; set; }
-
-    public double DurationInSeconds { get; set; }
 }

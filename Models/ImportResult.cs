@@ -7,6 +7,4 @@ public class ImportResult
     public int ImportedRows { get; set; }
 
     public int DuplicateRows { get; set; }
-
-    public double DurationInSeconds { get; set; }
 }

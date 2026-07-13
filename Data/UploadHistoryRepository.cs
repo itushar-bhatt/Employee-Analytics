@@ -24,8 +24,7 @@ public class UploadHistoryRepository
                 UploadDate,
                 TotalRows,
                 ImportedRows,
-                DuplicateRows,
-                DurationInSeconds
+                DuplicateRows
             )
             VALUES
             (
@@ -33,8 +32,7 @@ public class UploadHistoryRepository
                 @UploadDate,
                 @TotalRows,
                 @ImportedRows,
-                @DuplicateRows,
-                @DurationInSeconds
+                @DuplicateRows
             );";
 
         using var command = new SqliteCommand(query, connection);
@@ -44,8 +42,6 @@ public class UploadHistoryRepository
         command.Parameters.AddWithValue("@TotalRows", history.TotalRows);
         command.Parameters.AddWithValue("@ImportedRows", history.ImportedRows);
         command.Parameters.AddWithValue("@DuplicateRows", history.DuplicateRows);
-        command.Parameters.AddWithValue("@DurationInSeconds", history.DurationInSeconds);
-
         command.ExecuteNonQuery();
         using var idCommand = new SqliteCommand(
             "SELECT last_insert_rowid();",
@@ -78,8 +74,7 @@ public class UploadHistoryRepository
                 UploadDate = DateTime.Parse(reader["UploadDate"].ToString()!),
                 TotalRows = Convert.ToInt32(reader["TotalRows"]),
                 ImportedRows = Convert.ToInt32(reader["ImportedRows"]),
-                DuplicateRows = Convert.ToInt32(reader["DuplicateRows"]),
-                DurationInSeconds = Convert.ToDouble(reader["DurationInSeconds"])
+                DuplicateRows = Convert.ToInt32(reader["DuplicateRows"])
             });
         }
 

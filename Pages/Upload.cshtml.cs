@@ -50,7 +50,6 @@ public class UploadModel : PageModel
         Imported : {result.ImportedRows}
 
         Duplicates : {result.DuplicateRows}
-
-        Duration : {result.DurationInSeconds:F2} sec";
+        ";
     }
 }
