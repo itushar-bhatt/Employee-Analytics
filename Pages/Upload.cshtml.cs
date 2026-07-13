@@ -14,7 +14,7 @@ public class UploadModel : PageModel
     }
 
     [BindProperty]
-    public IFormFile CsvFile { get; set; }
+    public IFormFile? CsvFile { get; set; }
 
     public string Message { get; set; } = "";
 
