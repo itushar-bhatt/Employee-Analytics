@@ -7,4 +7,6 @@ public class ImportResult
     public int ImportedRows { get; set; }
 
     public int DuplicateRows { get; set; }
+    public int FailedRows { get; set; }
+
 }

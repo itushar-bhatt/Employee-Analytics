@@ -1,0 +1,38 @@
+@page
+@model EmployeeDashboard.Pages.ImportAnalysisModel
+
+<h2>Import Analysis</h2>
+
+<hr />
+
+<p><b>File:</b> @Model.Analysis?.FileName</p>
+
+<p><b>Total Rows:</b> @Model.Analysis?.TotalRows</p>
+
+<p><b>New Rows:</b> @Model.Analysis?.NewRows</p>
+
+<p><b>Possible Duplicates:</b> @Model.Analysis?.DuplicateRows</p>
+
+<hr />
+
+<form method="post">
+
+    <button type="submit" 
+            asp-page-handler="ImportAnyway" 
+            class="btn btn-success me-2">
+        Import Anyway
+    </button>
+
+    <button type="submit" 
+            asp-page-handler="ImportNewRows" 
+            class="btn btn-primary me-2">
+        Import New Rows Only
+    </button>
+
+    <button type="submit" 
+            asp-page-handler="Cancel" 
+            class="btn btn-danger">
+        Cancel
+    </button>
+
+</form>

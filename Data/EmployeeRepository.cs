@@ -57,6 +57,42 @@ public class EmployeeRepository
 
         return command.ExecuteNonQuery();
     }
+
+    public bool Exists(Employee employee)
+    {
+        using var connection = _databaseService.GetConnection();
+        connection.Open();
+
+        string query = @"
+            SELECT COUNT(*)
+            FROM Employees
+            WHERE CompanyCode = @CompanyCode
+            AND EmployeeName = @EmployeeName
+            AND Email = @Email
+            AND ProjectName = @ProjectName
+            AND TaskName = @TaskName
+            AND Status = @Status
+            AND WorkDate = @WorkDate
+            AND Hours = @Hours;";
+
+        using var command = new SqliteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@CompanyCode", employee.CompanyCode);
+        command.Parameters.AddWithValue("@EmployeeName", employee.EmployeeName);
+        command.Parameters.AddWithValue("@Email", employee.Email);
+        command.Parameters.AddWithValue("@ProjectName", employee.ProjectName);
+        command.Parameters.AddWithValue("@TaskName", employee.TaskName);
+        command.Parameters.AddWithValue("@Status", employee.Status);
+        command.Parameters.AddWithValue(
+            "@WorkDate",
+            employee.WorkDate.ToString("yyyy-MM-dd")
+        );
+        command.Parameters.AddWithValue("@Hours", employee.Hours);
+
+        int count = Convert.ToInt32(command.ExecuteScalar());
+
+        return count > 0;
+    }
     public List<Employee> GetAllEmployees()
     {
         List<Employee> employees = new();

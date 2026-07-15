@@ -21,8 +21,63 @@ public class DatabaseService
         using var connection = GetConnection();
         connection.Open();
 
+        RemoveUniqueConstraintIfExists(connection);
         CreateEmployeesTable(connection);
         CreateUploadHistoryTable(connection);
+    }
+    
+    // Remove UNIQUE constraint if it exists from old database schema
+    private void RemoveUniqueConstraintIfExists(SqliteConnection connection)
+    {
+        try
+        {
+            // Check if the old table with UNIQUE constraint exists
+            using var checkCommand = new SqliteCommand(
+                "SELECT sql FROM sqlite_master WHERE type='table' AND name='Employees';", 
+                connection);
+            
+            var existingSchema = checkCommand.ExecuteScalar()?.ToString();
+            
+            if (!string.IsNullOrEmpty(existingSchema) && existingSchema.Contains("UNIQUE"))
+            {
+                // Create new table without UNIQUE constraint
+                using var createNewTable = new SqliteCommand(@"
+                    CREATE TABLE Employees_new
+                    (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        CompanyCode TEXT,
+                        EmployeeName TEXT,
+                        Email TEXT,
+                        ProjectName TEXT,
+                        TaskName TEXT,
+                        Status TEXT,
+                        WorkDate TEXT,
+                        Hours REAL
+                    );", connection);
+                createNewTable.ExecuteNonQuery();
+                
+                // Copy data from old table
+                using var copyData = new SqliteCommand(
+                    "INSERT INTO Employees_new SELECT * FROM Employees;", 
+                    connection);
+                copyData.ExecuteNonQuery();
+                
+                // Drop old table
+                using var dropOldTable = new SqliteCommand(
+                    "DROP TABLE Employees;", connection);
+                dropOldTable.ExecuteNonQuery();
+                
+                // Rename new table
+                using var renameTable = new SqliteCommand(
+                    "ALTER TABLE Employees_new RENAME TO Employees;", 
+                    connection);
+                renameTable.ExecuteNonQuery();
+            }
+        }
+        catch (SqliteException)
+        {
+            // If anything fails, continue with normal table creation
+        }
     }
     
     // Creates the Employees table if it doesn't exist.
@@ -59,26 +114,6 @@ public class DatabaseService
         {
             // Column already exists.
         }
-
-
-        // Create a unique index to prevent duplicate entries.
-        string uniqueIndex = @"
-            CREATE UNIQUE INDEX IF NOT EXISTS IDX_Employee_Unique
-            ON Employees
-            (
-                CompanyCode,
-                EmployeeName,
-                Email,
-                ProjectName,
-                TaskName,
-                Status,
-                WorkDate,
-                Hours
-            );";
-
-
-            using var indexCommand = new SqliteCommand(uniqueIndex, connection);
-            indexCommand.ExecuteNonQuery();
     }
 
     // Creates the UploadHistory table if it doesn't exist.

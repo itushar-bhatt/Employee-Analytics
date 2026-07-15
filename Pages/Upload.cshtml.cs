@@ -1,16 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using EmployeeDashboard.Data;
+using EmployeeDashboard.ImportEngine.Services;
+using System.Text.Json;
+using EmployeeDashboard.ImportEngine.Enums;
 
 namespace EmployeeDashboard.Pages;
 
 public class UploadModel : PageModel
 {
     private readonly CsvImportService _csvImportService;
+    private readonly ImportAnalyzer _importAnalyzer;
 
-    public UploadModel(CsvImportService csvImportService)
+    public UploadModel(
+        CsvImportService csvImportService,
+        ImportAnalyzer importAnalyzer)
     {
         _csvImportService = csvImportService;
+        _importAnalyzer = importAnalyzer;
     }
 
     [BindProperty]
@@ -18,12 +25,20 @@ public class UploadModel : PageModel
 
     public string Message { get; set; } = "";
 
-    public async Task OnPostAsync()
+    public void OnGet()
+    {
+        if (TempData.ContainsKey("SuccessMessage"))
+        {
+            Message = TempData["SuccessMessage"]!.ToString()!;
+        }
+    }
+
+    public async Task<IActionResult> OnPostAsync()
     {
         if (CsvFile == null)
         {
             Message = "Please select a CSV file.";
-            return;
+            return Page();
         }
 
         string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
@@ -37,14 +52,35 @@ public class UploadModel : PageModel
             await CsvFile.CopyToAsync(stream);
         }
 
-        var result = _csvImportService.Import(filePath);
+        // Analyze the file first
+        var analysis = _importAnalyzer.Analyze(filePath);
 
-        Message =
-        $@"Total Rows : {result.TotalRows}
+        analysis.FilePath = filePath;
+        analysis.FileName = CsvFile.FileName;
 
-        Imported : {result.ImportedRows}
+        if (analysis.DuplicateRows > 0)
+        {
+            HttpContext.Session.SetString(
+                "ImportAnalysis",
+                JsonSerializer.Serialize(analysis));
 
-        Duplicates : {result.DuplicateRows}
-        ";
+            return RedirectToPage("/ImportAnalysis");
+        }
+        else
+        {
+            // No duplicates, import directly
+            var result = _csvImportService.Import(filePath, ImportMode.ImportAnyway);
+
+            Message =
+            $@"Import Successful
+
+        Total Rows : {result.TotalRows}
+
+        Imported : {result.ImportedRows}    
+
+        Duplicates : {result.DuplicateRows}";
+            
+            return Page();
+        }
     }
 }

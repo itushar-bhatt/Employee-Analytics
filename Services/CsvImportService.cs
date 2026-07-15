@@ -1,6 +1,6 @@
 using Microsoft.VisualBasic.FileIO;
 using EmployeeDashboard.Models;
-using System.Diagnostics;
+using EmployeeDashboard.ImportEngine.Enums;
 
 namespace EmployeeDashboard.Data;
 
@@ -20,10 +20,9 @@ public class CsvImportService
         _uploadHistoryRepository = uploadHistoryRepository;
     }
 
-    public ImportResult Import(string filePath)
+    public ImportResult Import(string filePath, ImportMode mode)
     {
         ImportResult result = new();
-
 
         using var connection = _databaseService.GetConnection();
         connection.Open();
@@ -35,7 +34,7 @@ public class CsvImportService
         parser.SetDelimiters(",");
         parser.HasFieldsEnclosedInQuotes = true;
 
-        // Skip header
+        // Skip Header
         parser.ReadFields();
 
         while (!parser.EndOfData)
@@ -46,16 +45,44 @@ public class CsvImportService
 
             Employee employee = CreateEmployee(data);
 
-            int rowsInserted =
-                _employeeRepository.Insert(employee, connection, transaction);
+            switch (mode)
+            {
+                case ImportMode.ImportAnyway:
 
-            if (rowsInserted == 1)
-            {
-                result.ImportedRows++;
-            }
-            else
-            {
-                result.DuplicateRows++;
+                    // INSERT OR IGNORE returns 1 if inserted, 0 if ignored (duplicate)
+                    int rowsAffected = _employeeRepository.Insert(
+                        employee,
+                        connection,
+                        transaction);
+
+                    if (rowsAffected > 0)
+                    {
+                        result.ImportedRows++;
+                    }
+                    else
+                    {
+                        result.DuplicateRows++;
+                    }
+
+                    break;
+
+                case ImportMode.NewRowsOnly:
+
+                    if (!_employeeRepository.Exists(employee))
+                    {
+                        _employeeRepository.Insert(
+                            employee,
+                            connection,
+                            transaction);
+
+                        result.ImportedRows++;
+                    }
+                    else
+                    {
+                        result.DuplicateRows++;
+                    }
+
+                    break;
             }
         }
 
@@ -91,7 +118,7 @@ public class CsvImportService
             UploadDate = DateTime.Now,
             TotalRows = result.TotalRows,
             ImportedRows = result.ImportedRows,
-            DuplicateRows = result.DuplicateRows,
+            DuplicateRows = result.DuplicateRows
         };
 
         _uploadHistoryRepository.Insert(history);
